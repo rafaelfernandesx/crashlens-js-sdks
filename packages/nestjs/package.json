@@ -14,6 +14,9 @@
     }
   },
   "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean --external @nestjs/common --external @nestjs/core --external @nestjs/platform-express --external @nestjs/websockets --external @nestjs/microservices --external rxjs --external reflect-metadata",
     "typecheck": "tsc --noEmit"

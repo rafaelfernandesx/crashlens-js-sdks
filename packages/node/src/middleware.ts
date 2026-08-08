@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { CrashLens } from '@crashlens/core';
+import { CrashLens } from '@crashlensorg/core';
 
 export interface CrashRequestInfo {
   method?: string;

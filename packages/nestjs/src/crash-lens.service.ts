@@ -1,5 +1,5 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { initNode, CrashLens, NodeInitOptions } from '@crashlens/node';
+import { initNode, CrashLens, NodeInitOptions } from '@crashlensorg/node';
 import { CRASH_LENS_OPTIONS } from './crash-lens.module';
 
 export interface CrashLensConfig extends NodeInitOptions {

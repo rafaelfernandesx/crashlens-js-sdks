@@ -1,4 +1,4 @@
-import { BaseTransport, PostFnOpts, TResponse } from '@crashlens/core';
+import { BaseTransport, PostFnOpts, TResponse } from '@crashlensorg/core';
 import http from 'node:http';
 import https from 'node:https';
 import { URL } from 'node:url';

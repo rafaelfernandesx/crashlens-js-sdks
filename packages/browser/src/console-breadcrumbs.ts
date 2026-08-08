@@ -1,4 +1,4 @@
-import { CrashLens, Severity } from '@crashlens/core';
+import { CrashLens, Severity } from '@crashlensorg/core';
 
 /** Instrumenta console.* para transformar mensagens em breadcrumbs. */
 export function instrumentConsoleBreadcrumbs(client: CrashLens): () => void {

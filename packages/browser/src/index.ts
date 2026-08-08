@@ -1,5 +1,5 @@
-import { CrashLens, CrashOptions } from '@crashlens/core';
-import { DeviceInfo } from '@crashlens/core';
+import { CrashLens, CrashOptions } from '@crashlensorg/core';
+import { DeviceInfo } from '@crashlensorg/core';
 import { collectBrowserInfo } from './device';
 import { initGlobalHandlers } from './integrations';
 import { instrumentHttpBreadcrumbs } from './http-breadcrumbs';
@@ -68,4 +68,4 @@ export function initBrowser(options: BrowserInitOptions): BrowserInstance {
 }
 
 export { CrashLens };
-export type { CrashOptions, CrashLensUser, Breadcrumb, DeviceInfo, Severity, CaptureParams } from '@crashlens/core';
+export type { CrashOptions, CrashLensUser, Breadcrumb, DeviceInfo, Severity, CaptureParams } from '@crashlensorg/core';

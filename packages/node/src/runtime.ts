@@ -1,4 +1,4 @@
-import { CrashLens, CrashOptions, DeviceInfo } from '@crashlens/core';
+import { CrashLens, CrashOptions, DeviceInfo } from '@crashlensorg/core';
 import os from 'node:os';
 
 /**
@@ -60,4 +60,4 @@ export function installGlobalErrorHandlers(client: CrashLens): void {
 }
 
 export { CrashLens };
-export type { CrashOptions, DeviceInfo, CrashLensUser, Breadcrumb } from '@crashlens/core';
+export type { CrashOptions, DeviceInfo, CrashLensUser, Breadcrumb } from '@crashlensorg/core';

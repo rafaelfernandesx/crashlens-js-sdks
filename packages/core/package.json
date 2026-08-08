@@ -1,5 +1,5 @@
 {
-  "name": "@crashlens/core",
+  "name": "@crashlensorg/core",
   "version": "0.1.0",
   "description": "CrashLens JS SDK — núcleo compartilhado (tipos, fingerprint, transport, fila, escopo, sessões)",
   "license": "MIT",

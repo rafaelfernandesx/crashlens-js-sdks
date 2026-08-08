@@ -1,5 +1,5 @@
-import { initNode, CrashLens } from '@crashlens/node';
-import type { NodeInitOptions } from '@crashlens/node';
+import { initNode, CrashLens } from '@crashlensorg/node';
+import type { NodeInitOptions } from '@crashlensorg/node';
 
 export interface NextServerOptions extends NodeInitOptions {
   /** Nome do runtime (padrão: "nextjs-node"). */
@@ -33,5 +33,5 @@ export function captureException(error: unknown, params?: Parameters<CrashLens['
   serverClient?.captureException(error, params);
 }
 
-export { initNode } from '@crashlens/node';
-export type { NodeInitOptions, CrashOptions, CrashLensUser, Breadcrumb, DeviceInfo, Severity } from '@crashlens/node';
+export { initNode } from '@crashlensorg/node';
+export type { NodeInitOptions, CrashOptions, CrashLensUser, Breadcrumb, DeviceInfo, Severity } from '@crashlensorg/node';

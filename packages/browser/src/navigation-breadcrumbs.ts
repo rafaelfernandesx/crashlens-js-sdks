@@ -1,4 +1,4 @@
-import { CrashLens } from '@crashlens/core';
+import { CrashLens } from '@crashlensorg/core';
 
 /** Instrumenta pushState/replaceState para gerar breadcrumbs de navegação. */
 export function instrumentNavigationBreadcrumbs(client: CrashLens): () => void {

@@ -1,5 +1,5 @@
 {
-  "name": "@crashlens/react",
+  "name": "@crashlensorg/react",
   "version": "0.1.0",
   "description": "CrashLens integração com React — ErrorBoundary, withErrorBoundary, useErrorHandler e contexto",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@crashlens/browser": "0.1.0"
+    "@crashlensorg/browser": "0.1.0"
   },
   "peerDependencies": {
     "react": ">=16.8.0"

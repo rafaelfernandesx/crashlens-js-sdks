@@ -1,7 +1,7 @@
 import { Component as ReactComponent, ComponentType, ErrorInfo, ReactNode, useContext } from 'react';
 import { CrashLensContext } from './context';
 import type { CrashLensContextValue } from './context';
-import type { CaptureParams } from '@crashlens/browser';
+import type { CaptureParams } from '@crashlensorg/browser';
 
 export interface ErrorBoundaryProps {
   fallback?: ReactNode | ((error: Error) => ReactNode);

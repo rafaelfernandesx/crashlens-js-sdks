@@ -1,9 +1,9 @@
-import { initBrowser, CrashLens } from '@crashlens/react';
-import type { BrowserInitOptions } from '@crashlens/react';
+import { initBrowser, CrashLens } from '@crashlensorg/react';
+import type { BrowserInitOptions } from '@crashlensorg/react';
 
-export { CrashLensProvider, ErrorBoundary, withErrorBoundary, useErrorHandler, useCrashLens, useClient } from '@crashlens/react';
-export type { CrashLensProviderProps, ErrorBoundaryProps } from '@crashlens/react';
-export type { BrowserInitOptions, CrashOptions, CrashLensUser, Breadcrumb, DeviceInfo, Severity, CaptureParams } from '@crashlens/react';
+export { CrashLensProvider, ErrorBoundary, withErrorBoundary, useErrorHandler, useCrashLens, useClient } from '@crashlensorg/react';
+export type { CrashLensProviderProps, ErrorBoundaryProps } from '@crashlensorg/react';
+export type { BrowserInitOptions, CrashOptions, CrashLensUser, Breadcrumb, DeviceInfo, Severity, CaptureParams } from '@crashlensorg/react';
 
 /**
  * Inicializa o SDK no browser (Next.js client).

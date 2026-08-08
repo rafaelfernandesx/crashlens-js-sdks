@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
-import type { BrowserInstance } from '@crashlens/browser';
-import { CrashLens } from '@crashlens/browser';
+import type { BrowserInstance } from '@crashlensorg/browser';
+import { CrashLens } from '@crashlensorg/browser';
 
 export interface CrashLensContextValue {
   client: BrowserInstance;

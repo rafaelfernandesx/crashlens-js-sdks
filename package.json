@@ -2,7 +2,7 @@
   "name": "crashlens-js-sdks",
   "version": "0.1.0",
   "private": true,
-  "description": "CrashLens JS/TS SDKs — @crashlens/core, node, browser, react, nestjs, nextjs",
+  "description": "CrashLens JS/TS SDKs — @crashlensorg/core, node, browser, react, nestjs, nextjs",
   "license": "MIT",
   "workspaces": [
     "packages/*"

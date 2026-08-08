@@ -1,4 +1,4 @@
-import { CrashLens } from '@crashlens/core';
+import { CrashLens } from '@crashlensorg/core';
 
 interface GlobalHandlersHooks {
   onError: (error: unknown, ctx: Record<string, unknown>) => void;

@@ -1,4 +1,4 @@
-import { DeviceInfo, WebDeviceInfo } from '@crashlens/core';
+import { DeviceInfo, WebDeviceInfo } from '@crashlensorg/core';
 
 /** Extrai nome e versão do browser a partir do user agent. */
 export function parseUserAgent(ua: string): { browserName?: string; browserVersion?: string } {

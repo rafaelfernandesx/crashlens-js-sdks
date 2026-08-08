@@ -1,5 +1,5 @@
 {
-  "name": "@crashlens/nestjs",
+  "name": "@crashlensorg/nestjs",
   "version": "0.1.0",
   "description": "CrashLens integração com NestJS — módulo, filtro global de exceções e interceptor HTTP",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@crashlens/node": "0.1.0"
+    "@crashlensorg/node": "0.1.0"
   },
   "peerDependencies": {
     "@nestjs/common": "^9.0.0 || ^10.0.0 || ^11.0.0",

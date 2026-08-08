@@ -1,5 +1,5 @@
 import { ReactNode, useMemo } from 'react';
-import { initBrowser, BrowserInitOptions } from '@crashlens/browser';
+import { initBrowser, BrowserInitOptions } from '@crashlensorg/browser';
 import { CrashLensContext } from './context';
 import type { CrashLensContextValue } from './context';
 

@@ -3,7 +3,7 @@ export { NodeHttpTransport } from './node-transport';
 export { crashlensMiddleware, crashlensErrorHandler, getRequestContext } from './middleware';
 export type { NodeInitOptions } from './runtime';
 export type { CrashRequestInfo, MiddlewareHttpOptions } from './middleware';
-export { CrashLens } from '@crashlens/core';
+export { CrashLens } from '@crashlensorg/core';
 export type {
   CrashOptions,
   CrashLensUser,
@@ -11,4 +11,4 @@ export type {
   DeviceInfo,
   Severity,
   CaptureParams,
-} from '@crashlens/core';
+} from '@crashlensorg/core';

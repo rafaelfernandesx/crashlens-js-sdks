@@ -1,3 +1,5 @@
+'use client';
+
 import { initBrowser, CrashLens } from '@crashlensorg/react';
 import type { BrowserInitOptions } from '@crashlensorg/react';
 

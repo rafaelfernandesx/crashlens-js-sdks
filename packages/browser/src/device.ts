@@ -39,6 +39,11 @@ function getOrCreateDeviceId(): string {
 
 /** Coleta informações do browser para o evento (deviceInfo com platformInfo.web). */
 export function collectBrowserInfo(): DeviceInfo {
+  // SSR / ambientes sem navigator (ex.: prerender do Next.js): retorna info mínima.
+  if (typeof navigator === 'undefined') {
+    return { deviceId: getOrCreateDeviceId(), deviceOs: 'web', deviceType: 'web' };
+  }
+
   const nav = navigator;
   const ua = nav?.userAgent ?? '';
   const { browserName, browserVersion } = parseUserAgent(ua);

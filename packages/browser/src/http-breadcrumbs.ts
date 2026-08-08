@@ -9,6 +9,9 @@ const xhrMeta = new WeakMap<XMLHttpRequest, XhrMeta>();
 
 /** Instrumenta fetch e XMLHttpRequest para adicionar breadcrumbs de rede. */
 export function instrumentHttpBreadcrumbs(client: CrashLens): () => void {
+  // SSR / ambientes sem window (ex.: prerender do Next.js): não instrumenta.
+  if (typeof window === 'undefined' || typeof XMLHttpRequest === 'undefined') return () => undefined;
+
   const addRequest = (method: string, url: string, status?: number) => {
     client.addBreadcrumb({
       message: `${method} ${url}`,

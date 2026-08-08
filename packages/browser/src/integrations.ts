@@ -10,6 +10,9 @@ interface GlobalHandlersHooks {
  * Retorna uma função de limpeza (removeEventListener).
  */
 export function installGlobalErrorHandlers(hooks: GlobalHandlersHooks): () => void {
+  // SSR / ambientes sem window (ex.: prerender do Next.js): não instrumenta.
+  if (typeof window === 'undefined') return () => undefined;
+
   const onError = (event: ErrorEvent) => {
     let error = event.error;
     if (!(error instanceof Error) && event.message) {

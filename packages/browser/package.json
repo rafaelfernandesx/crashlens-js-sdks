@@ -1,6 +1,6 @@
 {
   "name": "@crashlensorg/browser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CrashLens SDK para o browser — window.onerror, unhandledrejection, fetch/XHR, breadcrumbs e info de dispositivo web",
   "license": "MIT",
   "main": "./dist/index.js",

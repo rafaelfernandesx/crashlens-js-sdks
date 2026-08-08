@@ -1,0 +1,25 @@
+{
+  "name": "@crashlens/node",
+  "version": "0.1.0",
+  "description": "CrashLens SDK para Node.js — captura de exceções, rejeições não tratadas e contexto HTTP",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@crashlens/core": "0.1.0"
+  },
+  "keywords": ["crashlens", "nodejs", "error-monitoring", "crash-reporting", "sentry-alternative"]
+}

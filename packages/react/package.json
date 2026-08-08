@@ -1,0 +1,32 @@
+{
+  "name": "@crashlens/react",
+  "version": "0.1.0",
+  "description": "CrashLens integração com React — ErrorBoundary, withErrorBoundary, useErrorHandler e contexto",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.tsx --format cjs,esm --dts --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@crashlens/browser": "0.1.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "react": "^18.3.0"
+  },
+  "keywords": ["crashlens", "react", "error-boundary", "error-monitoring", "sentry-alternative"]
+}

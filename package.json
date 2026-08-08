@@ -1,0 +1,26 @@
+{
+  "name": "crashlens-js-sdks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CrashLens JS/TS SDKs — @crashlens/core, node, browser, react, nestjs, nextjs",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

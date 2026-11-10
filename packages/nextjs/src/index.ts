@@ -17,11 +17,12 @@ export function withCrashLens(config: NextConfigLike = {}, _options: WithCrashLe
   };
 }
 
-export { initNextServer } from './server';
-export type { NextServerOptions } from './server';
+export { initNextServer, captureRequestError } from './server';
+export type { NextServerOptions, NextRequestErrorRequest, NextRequestErrorContext } from './server';
 
 export {
   initNextBrowser,
+  captureBoundaryError,
   CrashLensProvider,
   ErrorBoundary,
   withErrorBoundary,

@@ -1,4 +1,5 @@
 export { initNode, installGlobalErrorHandlers, collectRuntimeInfo } from './runtime';
+export { runWithScope, withIsolationScope, asyncLocalScopeProvider } from './scope-context';
 export { NodeHttpTransport } from './node-transport';
 export { crashlensMiddleware, crashlensErrorHandler, getRequestContext } from './middleware';
 export type { NodeInitOptions } from './runtime';

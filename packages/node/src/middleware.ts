@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { CrashLens } from '@crashlensorg/core';
+import { runWithScope } from './scope-context';
 
 export interface CrashRequestInfo {
   method?: string;
@@ -36,7 +37,7 @@ export interface MiddlewareOptions {
 
 /**
  * Middleware de rastreamento de requests (compatível com Express/Connect).
- * Adiciona um breadcrumb de navegação em cada request.
+ * Adiciona um breadcrumb de navegação em cada request e isola o escopo por request.
  */
 export function crashlensMiddleware(client: CrashLens, opts: MiddlewareHttpOptions = {}) {
   return (req: HttpRequest, res: HttpResponse, next: NextFn): void => {
@@ -56,7 +57,8 @@ export function crashlensMiddleware(client: CrashLens, opts: MiddlewareHttpOptio
         },
       });
     });
-    next();
+    // cada request roda em um escopo isolado (user/tags/breadcrumbs não vazam)
+    runWithScope(() => next());
   };
 }
 

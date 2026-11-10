@@ -1,5 +1,6 @@
 import { CrashLens, CrashOptions, DeviceInfo } from '@crashlensorg/core';
 import os from 'node:os';
+import { asyncLocalScopeProvider } from './scope-context';
 
 /**
  * Coleta informações do host Node.js para enriquecer os eventos.
@@ -38,6 +39,7 @@ export function initNode(options: NodeInitOptions): CrashLens {
     runtime: options.runtime ?? 'node',
     runtimeVersion: options.runtimeVersion ?? process.version,
     deviceInfo,
+    scopeProvider: options.scopeProvider ?? asyncLocalScopeProvider,
     enableSessionTracking: options.enableSessionTracking ?? false,
   });
 

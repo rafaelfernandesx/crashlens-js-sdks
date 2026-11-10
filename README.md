@@ -6,7 +6,7 @@ SDKs oficiais de monitoramento de erros para JavaScript e TypeScript, publicados
 
 | Pacote | Descrição | Depende de |
 | --- | --- | --- |
-| [`@crashlensorg/core`](packages/core) | Núcleo compartilhado: tipos, fingerprint, transporte, fila, escopo e sessões | — |
+| [`@crashlensorg/core`](packages/core) | Núcleo compartilhado: tipos, transporte, fila, escopo e sessões | — |
 | [`@crashlensorg/node`](packages/node) | SDK para Node.js: `uncaughtException`, `unhandledRejection`, middleware HTTP e contexto de requisição | `core` |
 | [`@crashlensorg/browser`](packages/browser) | SDK para browser: `window.onerror`, `unhandledrejection`, fetch/XHR, breadcrumbs e info de dispositivo web | `core` |
 | [`@crashlensorg/react`](packages/react) | Integração com React: `ErrorBoundary`, `withErrorBoundary`, `useErrorHandler` e `CrashLensProvider` | `browser` |
@@ -81,6 +81,37 @@ import { CrashLensModule } from '@crashlensorg/nestjs';
 export class AppModule {}
 ```
 
+**Opções (`CrashLensModule.forRoot`)**
+
+| Opção | Padrão | Descrição |
+| --- | --- | --- |
+| `captureStatus` | `status >= 500` | `(status) => boolean`. HttpExceptions cujo status não passa **não** são capturadas (400/401/403/404 ficam de fora). Erros que não são `HttpException` contam como 500. |
+| `resolveUser` | `req.user.id / userId / sub` | `(req) => { id, email?, username? } \| null`. Usuário anexado aos eventos. |
+| `release` | `CRASHLENS_RELEASE`, depois `GIT_SHA` | |
+| `environment` | `CRASHLENS_ENVIRONMENT`, depois `NODE_ENV` | |
+| `enableGlobalHandlers` | `true` | `uncaughtException` / `unhandledRejection`. |
+| `isolateRequestScope` | `true` | Cada request HTTP roda num escopo isolado (middleware registrado para todas as rotas). |
+
+Cada evento capturado leva método, **padrão da rota** (ex.: `/users/:id`), request id (`x-request-id` ou `req.requestId`) e o usuário. Body, cookies e `Authorization` nunca são enviados.
+
+Só o **filtro** captura erros; o `CrashLensInterceptor` apenas adiciona o breadcrumb HTTP. Usando o interceptor sem o filtro, nada é enviado.
+
+**Já tem um filtro global próprio?** Desligue o filtro do módulo e chame o helper dentro do seu `catch()` (mesmo filtro de status e mesmo contexto de request; nunca lança):
+
+```ts
+CrashLensModule.forRoot({ apiKey: '...', globalFilter: false });
+
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter {
+  constructor(private readonly crashLens: CrashLensService) {}
+
+  catch(exception: unknown, host: ArgumentsHost) {
+    this.crashLens.captureHttpException(exception, host);
+    // ... sua resposta de erro atual
+  }
+}
+```
+
 ### Next.js
 
 ```ts
@@ -96,6 +127,37 @@ export async function register() {
 import { CrashLensProvider } from '@crashlensorg/nextjs/browser';
 // <CrashLensProvider apiKey="...">…</CrashLensProvider>
 ```
+
+```ts
+// instrumentation.ts — erros de render/route handlers/server actions (Next 15/16)
+export async function register() {
+  const { initNextServer } = await import('@crashlensorg/nextjs/server');
+  initNextServer({ apiKey: process.env.CRASHLENS_API_KEY! });
+}
+
+export { captureRequestError as onRequestError } from '@crashlensorg/nextjs/server';
+```
+
+`captureRequestError` envia tags `routePath`, `routeType`, `routerKind`, o método e o path (sem query); headers nunca, exceto o `x-request-id` se existir.
+
+```tsx
+// app/global-error.tsx (ou error.tsx)
+'use client';
+import { useEffect } from 'react';
+import { captureBoundaryError } from '@crashlensorg/nextjs/browser';
+
+export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
+  useEffect(() => captureBoundaryError(error), [error]); // registra também error.digest
+  return <html><body><h1>Algo deu errado</h1></body></html>;
+}
+```
+
+Variáveis de ambiente: `release` ← `CRASHLENS_RELEASE` / `NEXT_PUBLIC_CRASHLENS_RELEASE`; `environment` ← `CRASHLENS_ENVIRONMENT` / `NEXT_PUBLIC_CRASHLENS_ENVIRONMENT`, depois `NODE_ENV`.
+
+### Agrupamento (fingerprint) e escopo por request
+
+- O SDK **não envia mais fingerprint automático**: o servidor agrupa pelo tipo da exceção + frames do app. Passe `fingerprint: 'minha-chave'` em `captureException/captureMessage/captureEvent` apenas para um agrupamento customizado. (`computeEventHash` continua exportado, mas está *deprecated*.)
+- No Node, `runWithScope(fn)` / `withIsolationScope(fn)` (de `@crashlensorg/node`) roda `fn` com um escopo clonado do global, via `AsyncLocalStorage`: `setUser`, `setTag`, `setExtra` e `addBreadcrumb` afetam só esse escopo e as capturas leem o escopo corrente. `crashlensMiddleware` e o módulo NestJS já fazem isso por request. Fora de um escopo isolado, o escopo continua global. O browser mantém o escopo global.
 
 ---
 

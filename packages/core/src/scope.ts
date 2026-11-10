@@ -9,6 +9,14 @@ export interface ScopeOptions {
 }
 
 /**
+ * Fornece o escopo "atual" para o cliente (ex.: um escopo por request via AsyncLocalStorage).
+ * Recebe o escopo global e deve devolvê-lo quando não houver escopo isolado ativo.
+ */
+export interface ScopeProvider {
+  getScope(globalScope: Scope): Scope;
+}
+
+/**
  * Escopo global: usuário, tags, extra e breadcrumbs que acompanham todos os eventos.
  * Espelha o escopo do SDK Flutter (setUser, setTag, addBreadcrumb).
  */
@@ -45,6 +53,19 @@ export class Scope {
 
   get sessionId(): string | undefined {
     return this._sessionId;
+  }
+
+  /** Cria uma cópia independente (usuário, tags, extra e breadcrumbs). */
+  clone(): Scope {
+    const copy = new Scope({
+      maxBreadcrumbs: this.maxBreadcrumbs,
+      user: this._user ? { ...this._user } : undefined,
+      tags: { ...this._tags },
+      extra: { ...this._extra },
+    });
+    copy._breadcrumbs = [...this._breadcrumbs];
+    copy._sessionId = this._sessionId;
+    return copy;
   }
 
   setUser(user: CrashLensUser | null): void {

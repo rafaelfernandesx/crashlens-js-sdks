@@ -1,7 +1,6 @@
 import { CrashLensEvent } from '../event';
-import { computeEventHash } from '../fingerprint';
 import { EventQueue } from '../queue/event-queue';
-import { Scope } from '../scope';
+import { Scope, ScopeProvider } from '../scope';
 import { SessionTracker } from '../session';
 import { ITransport } from '../transport/transport';
 import { FetchTransport } from '../transport/fetch-transport';
@@ -40,6 +39,11 @@ export interface CrashOptions {
   deviceInfo?: DeviceInfo;
   /** Transporte customizado. */
   transport?: ITransport;
+  /**
+   * Provedor do escopo "atual" (ex.: AsyncLocalStorage no Node, para isolar por request).
+   * Padrão: o escopo global do cliente.
+   */
+  scopeProvider?: ScopeProvider;
 }
 
 export interface CaptureParams {
@@ -156,6 +160,7 @@ export class CrashLens {
   // ── Captura ──
 
   captureException(error: unknown, params: CaptureParams = {}): CaptureResult {
+    const scope = this.currentScope;
     const isErr = error instanceof Error;
     const event = new CrashLensEvent({
       apiKey: this.opts.apiKey,
@@ -164,14 +169,15 @@ export class CrashLens {
       exceptionType: params.exceptionType ?? (isErr ? error.constructor.name : typeof error),
       exceptionMessage: params.exceptionMessage ?? (isErr ? error.message : String(error)),
       stackTrace: params.stackTrace ?? (isErr ? (error.stack ?? undefined) : undefined),
+      fingerprint: params.fingerprint,
       release: params.release ?? this.opts.release,
       environment: params.environment ?? this.opts.environment,
       context: params.context,
       url: params.url,
-      user: params.user ?? this.scope.user,
-      tags: { ...this.scope.tags, ...params.tags },
-      extra: { ...this.scope.extra, ...params.extra },
-      breadcrumbs: [...this.scope.breadcrumbs],
+      user: params.user ?? scope.user,
+      tags: { ...scope.tags, ...params.tags },
+      extra: { ...scope.extra, ...params.extra },
+      breadcrumbs: [...scope.breadcrumbs],
       deviceInfo: this.deviceInfo,
       handled: params.handled ?? true,
       sessionId: this.scope.sessionId,
@@ -183,6 +189,7 @@ export class CrashLens {
   }
 
   captureMessage(message: string, params: CaptureParams = {}): CaptureResult {
+    const scope = this.currentScope;
     return this._capture(
       new CrashLensEvent({
         apiKey: this.opts.apiKey,
@@ -191,14 +198,15 @@ export class CrashLens {
         exceptionType: params.exceptionType,
         exceptionMessage: params.exceptionMessage,
         stackTrace: params.stackTrace,
+        fingerprint: params.fingerprint,
         release: params.release ?? this.opts.release,
         environment: params.environment ?? this.opts.environment,
         context: params.context,
         url: params.url,
-        user: params.user ?? this.scope.user,
-        tags: { ...this.scope.tags, ...params.tags },
-        extra: { ...this.scope.extra, ...params.extra },
-        breadcrumbs: [...this.scope.breadcrumbs],
+        user: params.user ?? scope.user,
+        tags: { ...scope.tags, ...params.tags },
+        extra: { ...scope.extra, ...params.extra },
+        breadcrumbs: [...scope.breadcrumbs],
         deviceInfo: this.deviceInfo,
         handled: params.handled ?? true,
         sessionId: this.scope.sessionId,
@@ -209,6 +217,7 @@ export class CrashLens {
   }
 
   captureEvent(params: CaptureParams = {}): CaptureResult {
+    const scope = this.currentScope;
     return this._capture(
       new CrashLensEvent({
         apiKey: this.opts.apiKey,
@@ -222,10 +231,10 @@ export class CrashLens {
         environment: params.environment ?? this.opts.environment,
         context: params.context,
         url: params.url,
-        user: params.user ?? this.scope.user,
-        tags: { ...this.scope.tags, ...params.tags },
-        extra: { ...this.scope.extra, ...params.extra },
-        breadcrumbs: [...this.scope.breadcrumbs],
+        user: params.user ?? scope.user,
+        tags: { ...scope.tags, ...params.tags },
+        extra: { ...scope.extra, ...params.extra },
+        breadcrumbs: [...scope.breadcrumbs],
         deviceInfo: this.deviceInfo,
         handled: params.handled ?? true,
         sessionId: this.scope.sessionId,
@@ -250,9 +259,8 @@ export class CrashLens {
       }
     }
 
-    if (event.fingerprint == null) {
-      event = event.copyWith({ fingerprint: computeEventHash(event) });
-    }
+    // O fingerprint só é enviado quando definido explicitamente pelo chamador;
+    // o agrupamento automático é feito pelo servidor.
     if (event.severity === 'fatal' || !event.handled) {
       this._session?.markCrashed();
     }
@@ -264,24 +272,29 @@ export class CrashLens {
 
   // ── Escopo ──
 
+  /** Escopo atual: o fornecido pelo scopeProvider (se houver) ou o global. */
+  get currentScope(): Scope {
+    return this.opts.scopeProvider?.getScope(this.scope) ?? this.scope;
+  }
+
   addBreadcrumb(breadcrumb: Breadcrumb): void {
-    this.scope.addBreadcrumb(breadcrumb);
+    this.currentScope.addBreadcrumb(breadcrumb);
   }
 
   setUser(user: CrashLensUser | null): void {
-    this.scope.setUser(user);
+    this.currentScope.setUser(user);
   }
 
   setTag(key: string, value: unknown): void {
-    this.scope.setTag(key, value);
+    this.currentScope.setTag(key, value);
   }
 
   removeTag(key: string): void {
-    this.scope.removeTag(key);
+    this.currentScope.removeTag(key);
   }
 
   setExtra(key: string, value: unknown): void {
-    this.scope.setExtra(key, value);
+    this.currentScope.setExtra(key, value);
   }
 
   // ── Sessão ──

@@ -4,6 +4,10 @@ import type { CrashLensEvent } from './event';
 /**
  * Gera um fingerprint SHA-256 do conteúdo do evento (excluindo timestamp),
  * para agrupar erros idênticos no backend — espelha ErrorsService.generateFingerprint.
+ *
+ * @deprecated O SDK não envia mais fingerprint automático: o servidor agrupa os eventos
+ * (tipo da exceção + frames do app) e ignora hashes de 64 hex. Defina `fingerprint`
+ * apenas para um agrupamento customizado.
  */
 export function computeEventHash(event: CrashLensEvent): string {
   const parts = [

@@ -1,10 +1,13 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { CrashLensService } from './crash-lens.service';
 
 /**
- * Captura todas as exceções não tratadas e as envia ao CrashLens,
- * preservando o comportamento padrão do NestJS.
+ * Captura exceções e as envia ao CrashLens (respeitando `captureStatus`, padrão >= 500),
+ * preservando o comportamento padrão do NestJS. É o único ponto de captura do módulo.
+ *
+ * Se o app já tem um filtro global próprio, use `CrashLensService.captureHttpException`
+ * dentro dele (com `globalFilter: false`).
  */
 @Catch()
 export class CrashLensFilter extends BaseExceptionFilter implements ExceptionFilter {
@@ -13,27 +16,7 @@ export class CrashLensFilter extends BaseExceptionFilter implements ExceptionFil
   }
 
   override catch(exception: unknown, host: ArgumentsHost): void {
-    const status =
-      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-    const request = host.switchToHttp().getRequest();
-
-    const message = exception instanceof Error ? exception.message : String(exception);
-
-    this.crashLens.captureException(exception, {
-      context: 'nestjs-exception-filter',
-      handled: false,
-      tags: {
-        httpStatus: String(status),
-        httpMethod: request?.method,
-      },
-      extra: {
-        url: request?.url,
-        method: request?.method,
-        statusCode: status,
-        error: message,
-      },
-    });
-
+    this.crashLens.captureHttpException(exception, host);
     super.catch(exception, host);
   }
 }

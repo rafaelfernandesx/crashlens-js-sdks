@@ -1,39 +1,32 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { CrashLensService } from './crash-lens.service';
 
 /**
- * Interceptor que adiciona breadcrumbs de request e captura erros dos handlers.
+ * Interceptor que adiciona o breadcrumb HTTP de cada request.
+ *
+ * Ele NÃO captura erros: a captura é feita somente pelo `CrashLensFilter` (ou por
+ * `CrashLensService.captureHttpException` num filtro próprio). Usado sozinho, sem filtro,
+ * os erros não são enviados ao CrashLens.
  */
 @Injectable()
 export class CrashLensInterceptor implements NestInterceptor {
   constructor(private readonly crashLens: CrashLensService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest();
-
-    if (request) {
-      this.crashLens.addBreadcrumb({
-        message: `${request.method ?? 'GET'} ${request.url ?? '/'}`,
-        type: 'request',
-        category: 'http',
-        data: { method: request.method, url: request.url },
-      });
+    if (context.getType() === 'http') {
+      const request = context.switchToHttp().getRequest();
+      if (request) {
+        const url = String(request.originalUrl ?? request.url ?? '/');
+        const path = url.split('?')[0];
+        this.crashLens.addBreadcrumb({
+          message: `${request.method ?? 'GET'} ${path}`,
+          type: 'request',
+          category: 'http',
+          data: { method: request.method, url: path },
+        });
+      }
     }
-
-    return next.handle().pipe(
-      tap({
-        error: (error) => {
-          this.crashLens.captureException(error, {
-            handled: false,
-            context: 'context.interceptor',
-            tags: { httpMethod: request?.method },
-            extra: { url: request?.url },
-          });
-        },
-      }),
-      catchError((error) => throwError(() => error)),
-    );
+    return next.handle();
   }
 }

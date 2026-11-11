@@ -32,8 +32,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@crashlensorg/node": "0.2.0",
-    "@crashlensorg/react": "0.2.0"
+    "@crashlensorg/node": "0.3.0",
+    "@crashlensorg/react": "0.3.0"
   },
   "peerDependencies": {
     "next": ">=13.0.0",

@@ -1,6 +1,6 @@
 {
   "name": "@crashlensorg/node",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "CrashLens SDK para Node.js — captura de exceções, rejeições não tratadas e contexto HTTP",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@crashlensorg/core": "0.2.0"
+    "@crashlensorg/core": "0.3.0"
   },
   "keywords": ["crashlens", "nodejs", "error-monitoring", "crash-reporting", "sentry-alternative"]
 }

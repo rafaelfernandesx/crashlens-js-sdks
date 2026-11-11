@@ -59,8 +59,8 @@ describe('EventQueue', () => {
     expect(q.pendingCount).toBe(0);
   });
 
-  it('pausa em queda por quota (429)', async () => {
-    const t = new MockTransport([{ ok: false, status: 429 }]);
+  it('pausa em 402 (quota)', async () => {
+    const t = new MockTransport([{ ok: false, status: 402 }]);
     let quotaPaused = false;
     const q = new EventQueue({ transport: t, onQuotaExceeded: () => (quotaPaused = true) });
     q.enqueue(new CrashLensEvent({ apiKey: 'k', message: 'm' }));

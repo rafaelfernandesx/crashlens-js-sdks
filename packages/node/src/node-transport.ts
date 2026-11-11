@@ -1,4 +1,4 @@
-import { BaseTransport, PostFnOpts, TResponse } from '@crashlensorg/core';
+import { BaseTransport, parseRetryAfter, PostFnOpts, TResponse } from '@crashlensorg/core';
 import http from 'node:http';
 import https from 'node:https';
 import { URL } from 'node:url';
@@ -29,10 +29,17 @@ export class NodeHttpTransport extends BaseTransport {
           res.on('data', (c) => chunks.push(c));
           res.on('end', () => {
             const bodyText = Buffer.concat(chunks).toString('utf8');
+            const status = res.statusCode ?? 0;
+            if (status >= 200 && status < 300) {
+              resolve({ ok: true, status, body: bodyText });
+              return;
+            }
+            const ra = res.headers['retry-after'];
             resolve({
-              ok: res.statusCode !== undefined && res.statusCode >= 200 && res.statusCode < 300,
-              status: res.statusCode ?? 0,
+              ok: false,
+              status,
               body: bodyText,
+              retryAfter: parseRetryAfter(Array.isArray(ra) ? ra[0] : ra),
             });
           });
         },

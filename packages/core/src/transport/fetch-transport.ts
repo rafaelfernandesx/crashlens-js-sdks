@@ -1,4 +1,4 @@
-import { BaseTransport, PostFn, PostFnOpts, TResponse } from './transport';
+import { BaseTransport, parseRetryAfter, PostFn, PostFnOpts, TResponse } from './transport';
 
 /**
  * Transporte baseado em fetch global (browser + Node.js 18+).
@@ -16,10 +16,13 @@ export class FetchTransport extends BaseTransport {
         keepalive: true,
       });
       const text = await response.text().catch(() => '');
+      const ok = response.status >= 200 && response.status < 300;
+      if (ok) return { ok: true, status: response.status, body: text };
       return {
-        ok: response.status >= 200 && response.status < 300,
+        ok: false,
         status: response.status,
         body: text,
+        retryAfter: parseRetryAfter(response.headers.get('retry-after')),
       };
     } catch (err) {
       const status = err instanceof Error && err.name === 'AbortError' ? 408 : 0;

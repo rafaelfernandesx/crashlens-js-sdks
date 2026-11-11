@@ -55,6 +55,8 @@ export interface DeviceInfo {
 
 /** Payload exato enviado à API CrashLens (espelha o IngestEventDto do backend). */
 export interface IngestPayload {
+  /** UUID gerado no cliente (idempotência no servidor). */
+  eventId?: string;
   message: string;
   severity?: Severity;
   exceptionType?: string;

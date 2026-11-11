@@ -1,8 +1,8 @@
 import type { CrashLensEvent } from '../event';
 
 export type TResponse =
-  | { ok: true; status: number }
-  | { ok: false; status: number; body?: string };
+  | { ok: true; status: number; body?: string }
+  | { ok: false; status: number; body?: string; retryAfter?: number };
 
 /**
  * Transporte envia eventos/sessões para a API CrashLens.
@@ -30,7 +30,18 @@ export type PostFn = (opts: PostFnOpts) => Promise<TResponse>;
 /** Status HTTP que indicam limite de plano/quota atingido → SDK deve pausar. */
 export const QUOTA_STATUS = [402, 429];
 
-export const isOk = (res: TResponse): boolean => res.ok && (res.status === 200 || res.status === 201);
+/** Qualquer 2xx é considerado sucesso. */
+export const isOk = (res: TResponse): boolean => res.ok && res.status >= 200 && res.status < 300;
+
+/** Converte o header Retry-After (segundos ou data HTTP) em segundos. */
+export function parseRetryAfter(value: string | null | undefined): number | undefined {
+  if (!value) return undefined;
+  const secs = Number(value);
+  if (Number.isFinite(secs)) return Math.max(0, secs);
+  const date = Date.parse(value);
+  if (!Number.isNaN(date)) return Math.max(0, Math.ceil((date - Date.now()) / 1000));
+  return undefined;
+}
 
 export abstract class BaseTransport implements ITransport {
   protected readonly baseUrl: string;

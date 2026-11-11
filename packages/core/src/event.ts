@@ -1,5 +1,6 @@
 import type { Breadcrumb, CaptureOptions, CrashLensUser, DeviceInfo, IngestPayload, Severity } from './types';
 import { uuidv4 } from './utils/nanoid';
+import { capBreadcrumbs, capObject, LIMITS, truncateString } from './utils/limits';
 
 export class CrashLensEvent {
   eventId: string;
@@ -108,7 +109,8 @@ export class CrashLensEvent {
 
   toJson(): IngestPayload {
     const payload: IngestPayload = {
-      message: this.message,
+      eventId: this.eventId,
+      message: truncateString(this.message, LIMITS.message),
       severity: this.severity,
       handled: this.handled,
       timestamp: this.timestamp,
@@ -117,16 +119,16 @@ export class CrashLensEvent {
       runtimeVersion: this.runtimeVersion,
     };
     if (this.exceptionType !== undefined) payload.exceptionType = this.exceptionType;
-    if (this.exceptionMessage !== undefined) payload.exceptionMessage = this.exceptionMessage;
-    if (this.stackTrace !== undefined) payload.stackTrace = this.stackTrace;
+    if (this.exceptionMessage !== undefined) payload.exceptionMessage = truncateString(this.exceptionMessage, LIMITS.message);
+    if (this.stackTrace !== undefined) payload.stackTrace = truncateString(this.stackTrace, LIMITS.stackTrace);
     if (this.fingerprint !== undefined) payload.fingerprint = this.fingerprint;
     if (this.release !== undefined) payload.release = this.release;
-    if (this.context !== undefined) payload.context = this.context;
+    if (this.context !== undefined) payload.context = truncateString(this.context, LIMITS.blob);
     if (this.url !== undefined) payload.url = this.url;
     if (this.user !== undefined) payload.user = this.user;
-    if (this.tags !== undefined && Object.keys(this.tags).length > 0) payload.tags = this.tags;
-    if (this.extra !== undefined && Object.keys(this.extra).length > 0) payload.extra = this.extra;
-    if (this.breadcrumbs.length > 0) payload.breadcrumbs = this.breadcrumbs;
+    if (this.tags !== undefined && Object.keys(this.tags).length > 0) payload.tags = capObject(this.tags, LIMITS.blob);
+    if (this.extra !== undefined && Object.keys(this.extra).length > 0) payload.extra = capObject(this.extra, LIMITS.blob);
+    if (this.breadcrumbs.length > 0) payload.breadcrumbs = capBreadcrumbs(this.breadcrumbs);
     if (this.deviceInfo !== undefined) payload.deviceInfo = this.deviceInfo;
     if (this.environment !== undefined) payload.environment = this.environment;
     return payload;

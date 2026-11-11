@@ -25,6 +25,8 @@ export interface CrashOptions {
   beforeSend?: EventHandler;
   /** Máximo de breadcrumbs retidos. */
   maxBreadcrumbs?: number;
+  /** Máximo de eventos retidos na fila (os mais antigos são descartados). */
+  maxQueueSize?: number;
   /** Intervalo de envio (ms). */
   flushIntervalMs?: number;
   /** Máximo de tentativas de retry. */
@@ -84,6 +86,9 @@ export class CrashLens {
   private _transport?: ITransport;
   private _session?: SessionTracker;
   private _initialized = false;
+  /** Chave validada: só então a fila pode enviar (antes disso apenas armazena). */
+  private _validated = false;
+  private _validation?: Promise<boolean>;
   private _keyValid = true;
   private _paused = false;
   private deviceInfo?: DeviceInfo;
@@ -105,10 +110,9 @@ export class CrashLens {
     };
     this.scope.maxBreadcrumbs = this.opts.maxBreadcrumbs!;
     this.deviceInfo = options.deviceInfo;
-  }
 
-  /** Inicializa o SDK: valida a chave, configura fila e inicia a sessão. */
-  async init(): Promise<void> {
+    // Fila criada já no construtor: eventos capturados antes do init() terminar ficam
+    // em buffer e só são enviados depois da validação da chave.
     this._transport =
       this.opts.transport ??
       new FetchTransport({
@@ -116,20 +120,30 @@ export class CrashLens {
         apiKey: this.opts.apiKey,
         timeoutMs: this.opts.timeoutMs,
       });
-
-    this._keyValid = await this._transport.validateApiKey();
-    if (!this._keyValid) {
-      this._initialized = true;
-      return;
-    }
-
     this._queue = new EventQueue({
       transport: this._transport,
       maxRetries: this.opts.maxRetries,
       flushIntervalMs: this.opts.flushIntervalMs,
+      maxQueueSize: this.opts.maxQueueSize,
+      canSend: () => this._validated,
       onQuotaExceeded: () => this.pause('limite de plano atingido'),
     });
-    this._queue.startAutoFlush();
+  }
+
+  /** Inicializa o SDK: valida a chave, configura fila e inicia a sessão. */
+  async init(): Promise<void> {
+    this._validation = this._transport!.validateApiKey();
+    this._keyValid = await this._validation;
+    if (!this._keyValid) {
+      // chave inválida: descarta o que ficou em buffer
+      this._queue?.dispose();
+      this._initialized = true;
+      return;
+    }
+
+    this._validated = true;
+    this._queue!.startAutoFlush();
+    void this._queue!.flush();
 
     if (this.opts.enableSessionTracking) {
       await this._startSession();
@@ -348,11 +362,14 @@ export class CrashLens {
   }
 
   async flush(): Promise<void> {
+    // se a validação da chave está em andamento, espera antes de enviar
+    if (!this._validated && this._validation) await this._validation.catch(() => false);
+    if (!this._validated) return;
     await this._queue?.flush();
   }
 
   async close(): Promise<void> {
-    await this._queue?.flush();
+    if (this._validated) await this._queue?.flush();
     this._queue?.dispose();
     await this._session?.end();
     this._initialized = false;

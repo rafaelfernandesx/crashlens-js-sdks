@@ -38,7 +38,7 @@ const RETRY_AFTER_MAX_MS = 5 * 60_000;
 export class EventQueue {
   private queue: PendingEvent[] = [];
   private timer?: ReturnType<typeof setInterval>;
-  private flushing = false;
+  private inFlight?: Promise<void>;
   private paused = false;
   private closed = false;
   private backoffUntil = 0;
@@ -99,21 +99,33 @@ export class EventQueue {
   }
 
   async flush(): Promise<void> {
-    if (this.flushing || this.paused || this.closed) return;
+    // Envio já em andamento (ex.: o disparado ao validar a chave): espera ele terminar em vez de
+    // voltar na hora — quem chama flush() antes de encerrar o processo perdia o evento.
+    // Depois envia o que entrou na fila nesse meio-tempo.
+    if (this.inFlight) {
+      await this.inFlight;
+      if (this.requeued) return; // falha transitória: fica para o próximo ciclo
+      return this.flush();
+    }
+    if (this.paused || this.closed) return;
     if (this.canSend && !this.canSend()) return;
     if (Date.now() < this.backoffUntil) return;
-    this.flushing = true;
+    this.inFlight = this.drain();
     try {
-      while (this.queue.length > 0 && !this.paused && !this.closed && Date.now() >= this.backoffUntil) {
-        const batch = this.takeBatch();
-        this.requeued = false;
-        const sent = await this.processBatch(batch);
-        if (sent.length > 0 && this.onBatchSent) this.onBatchSent(sent.map((p) => p.event));
-        // itens devolvidos à fila: tenta de novo só no próximo ciclo (evita loop apertado)
-        if (this.requeued) break;
-      }
+      await this.inFlight;
     } finally {
-      this.flushing = false;
+      this.inFlight = undefined;
+    }
+  }
+
+  private async drain(): Promise<void> {
+    while (this.queue.length > 0 && !this.paused && !this.closed && Date.now() >= this.backoffUntil) {
+      const batch = this.takeBatch();
+      this.requeued = false;
+      const sent = await this.processBatch(batch);
+      if (sent.length > 0 && this.onBatchSent) this.onBatchSent(sent.map((p) => p.event));
+      // itens devolvidos à fila: tenta de novo só no próximo ciclo (evita loop apertado)
+      if (this.requeued) break;
     }
   }
 

@@ -150,6 +150,41 @@ describe('CrashLens client', () => {
     await client.close();
   });
 
+  it('flush() logo após o init só resolve depois do envio (não perde o evento ao encerrar)', async () => {
+    const t = new FakeTransport();
+    let delivered = false;
+    t.sendBatch = async (events) => {
+      await new Promise((r) => setTimeout(r, 30)); // envio lento: fica em andamento
+      t.batches.push(events.map((e) => e.message));
+      delivered = true;
+      return { ok: true, status: 201 } as TResponse;
+    };
+    const client = new CrashLens({ apiKey: 'k', transport: t, enableSessionTracking: false });
+    void client.init();
+    client.captureMessage('crash no boot');
+    await client.flush();
+    expect(delivered).toBe(true);
+    expect(t.batches.flat()).toEqual(['crash no boot']);
+    await client.close();
+  });
+
+  it('flush() concorrente envia também o que entrou durante o envio em andamento', async () => {
+    const t = new FakeTransport();
+    t.sendBatch = async (events) => {
+      await new Promise((r) => setTimeout(r, 20));
+      t.batches.push(events.map((e) => e.message));
+      return { ok: true, status: 201 } as TResponse;
+    };
+    const q = new EventQueue({ transport: t });
+    q.enqueue(ev('a'));
+    const first = q.flush();
+    q.enqueue(ev('b'));
+    await q.flush();
+    await first;
+    expect(t.batches.flat().sort()).toEqual(['a', 'b']);
+    expect(q.pendingCount).toBe(0);
+  });
+
   it('descarta o buffer se a chave for inválida', async () => {
     const t = new FakeTransport();
     t.validateApiKey = async () => false;

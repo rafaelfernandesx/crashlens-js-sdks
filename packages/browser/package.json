@@ -1,6 +1,6 @@
 {
   "name": "@crashlensorg/browser",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "CrashLens SDK para o browser — window.onerror, unhandledrejection, fetch/XHR, breadcrumbs e info de dispositivo web",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@crashlensorg/core": "0.3.0"
+    "@crashlensorg/core": "0.3.1"
   },
   "keywords": ["crashlens", "browser", "react", "javascript", "error-monitoring", "sentry-alternative"]
 }

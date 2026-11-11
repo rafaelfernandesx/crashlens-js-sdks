@@ -1,6 +1,6 @@
 {
   "name": "@crashlensorg/core",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "CrashLens JS SDK — núcleo compartilhado (tipos, fingerprint, transport, fila, escopo, sessões)",
   "license": "MIT",
   "main": "./dist/index.js",

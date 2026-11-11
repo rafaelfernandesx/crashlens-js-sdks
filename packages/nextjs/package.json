@@ -1,6 +1,6 @@
 {
   "name": "@crashlensorg/nextjs",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "CrashLens integração com Next.js — instrumentação server/client, error boundaries e API routes",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -32,8 +32,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@crashlensorg/node": "0.3.0",
-    "@crashlensorg/react": "0.3.0"
+    "@crashlensorg/node": "0.3.1",
+    "@crashlensorg/react": "0.3.1"
   },
   "peerDependencies": {
     "next": ">=13.0.0",
